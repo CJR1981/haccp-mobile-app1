@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HACCP Mobile App - SharePoint Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+        }
+        
+        .container {
+            max-width: 430px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .header-title h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+        
+        .header-title p {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        
+        .status-online { background: rgba(34, 197, 94, 0.3); color: #16a34a; }
+        .status-connected { background: rgba(59, 130, 246, 0.3); color: #2563eb; }
+        .status-not-auth { background: rgba(245, 158, 11, 0.3); color: #d97706; }
+        
+        .alert-card {
+            margin: 1rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 2px solid;
+        }
+        
+        .alert-warning {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+        
+        .alert-info {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 80px;
+            z-index: 90;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 1rem 0.5rem;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.75rem;
+            color: #6b7280;
+            transition: all 0.2s;
+        }
+        
+        .nav-tab.active {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+            background: #eff6ff;
+        }
+        
+        .content {
+            padding: 1rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #374151;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-success { background: #16a34a; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-danger { background: #dc2626; color: white; }
+        
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        
+        .quick-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .quick-btn {
+            padding: 1rem 0.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        
+        .cooking { background: #dc2626; }
+        .cold { background: #2563eb; }
+        .hot-hold { background: #ea580c; }
+        
+        .sync-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .sync-stat {
+            text-align: center;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+        }
+        
+        .sync-stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .sync-stat-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .reading-item {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid;
+            margin-bottom: 0.75rem;
+            position: relative;
+        }
+        
+        .reading-in-range {
+            border-color: #16a34a;
+            background: #f0fdf4;
+        }
+        
+        .reading-out-range {
+            border-color: #dc2626;
+            background: #fef2f2;
+        }
+        
+        .reading-critical {
+            border-color: #dc2626;
+            background: #fef2f2;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .sync-indicator {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 50%;
+        }
+        
+        .sync-synced { background: #16a34a; }
+        .sync-pending { background: #f59e0b; }
+        .sync-failed { background: #dc2626; }
+        
+        .hidden { display: none; }
+        
+        .text-success { color: #16a34a; }
+        .text-danger { color: #dc2626; }
+        .text-warning { color: #f59e0b; }
+        .text-blue { color: #2563eb; }
+        
+        .help-text {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>🌡️ HACCP Monitor</h1>
+                    <p>SharePoint + PowerApps Ready</p>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <span id="db-icon">🗃️</span>
+                    <span id="wifi-icon">📶</span>
+                    <span>👤</span>
+                </div>
+            </div>
+            
+            <div class="status-bar">
+                <span id="current-user">Not authenticated</span>
+                <div style="display: flex; gap: 0.5rem;">
+                    <span class="status-badge status-online">Online</span>
+                    <span id="sync-status" class="status-badge status-not-auth">Not configured</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Configuration Alert -->
+        <div id="config-alert" class="alert-card alert-warning">
+            <h3 style="margin-bottom: 0.5rem;">🔐 SharePoint Configuration Required</h3>
+            <p style="margin-bottom: 1rem; font-size: 0.875rem;">
+                Configure your SharePoint settings and authenticate to enable PowerApps integration.
+            </p>
+            <button onclick="showTab('settings')" class="btn btn-warning">
+                Configure Now
+            </button>
+        </div>
+
+        <!-- Sync Status Card -->
+        <div id="sync-card" class="alert-card alert-info hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="margin: 0;">📊 SharePoint Sync Status</h3>
+                <button onclick="performSync()" class="btn btn-primary" style="width: auto; padding: 0.5rem 1rem; font-size: 0.875rem;">
+                    Sync Now
+                </button>
+            </div>
+            
+            <div class="sync-stats">
+                <div class="sync-stat">
+                    <div class="sync-stat-number text-blue" id="total-count">2</div>
+                    <div class="sync-stat-label">Total</div>
+                </div>
+                <div class="sync-stat">
+                    <div class="sync-stat-number text-success" id="synced-count">1</div>
+                    <div class="sync-stat-label">Synced</div>
+                </div>
+                <div class="sync-stat">
+                    <div class="sync-stat-number text-warning" id="pending-count">1</div>
+                    <div class="sync-stat-label">Pending</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 0.75rem; font-size: 0.75rem; color: #6b7280; text-align: center;">
+                Last sync: <span id="last-sync">Never</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('logging')">
+                🌡️<br><span style="font-size: 0.75rem;">Log</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('monitoring')">
+                ⚠️<br><span style="font-size: 0.75rem;">Monitor</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('recent')">
+                🕐<br><span style="font-size: 0.75rem;">Recent</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('settings')">
+                ⚙️<br><span style="font-size: 0.75rem;">Settings</span>
+            </button>
+        </nav>
+
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Temperature Logging Tab -->
+            <div id="logging-tab" class="tab-content">
+                <!-- Quick Access -->
+                <div class="card">
+                    <h3>Quick Log</h3>
+                    <div class="quick-buttons">
+                        <button class="quick-btn cooking" onclick="selectCCP('1')">Cooking A</button>
+                        <button class="quick-btn cold" onclick="selectCCP('2')">Cold Storage</button>
+                        <button class="quick-btn hot-hold" onclick="selectCCP('3')">Hot Hold</button>
+                    </div>
+                </div>
+
+                <!-- Bluetooth Thermometer -->
+                <div class="card" style="background: #f8fafc; border: 2px solid #e5e7eb;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="margin: 0;">Bluetooth Thermometer</h3>
+                        <span id="bt-status" class="status-badge status-not-auth">Disconnected</span>
+                    </div>
+                    
+                    <div id="bt-disconnected">
+                        <button onclick="connectBluetooth()" class="btn btn-primary">Connect Thermometer</button>
+                    </div>
+                    
+                    <div id="bt-connected" class="hidden">
+                        <div style="background: white; padding: 1rem; border-radius: 0.5rem; text-align: center; border: 1px solid #d1d5db;">
+                            <div id="live-temp" style="font-size: 2rem; font-weight: 700; color: #2563eb; margin-bottom: 0.5rem;">--°F</div>
+                            <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">Live Reading</div>
+                            <button onclick="useReading()" class="btn btn-success">Use This Reading</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Temperature Entry Form -->
+                <div class="card">
+                    <h3>Temperature Entry</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Control Point</label>
+                        <select id="ccp-select" class="form-select">
+                            <option value="">Select CCP...</option>
+                            <option value="1">Cooking Station A - Line 1 (165-185°F)</option>
+                            <option value="2">Cold Storage - Warehouse (32-40°F)</option>
+                            <option value="3">Hot Holding - Line 2 (140-160°F)</option>
+                            <option value="4">Blast Chiller - Processing (0-32°F)</option>
+                            <option value="5">Fryer Oil - Line 1 (325-375°F)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Temperature (°F)</label>
+                            <input type="number" step="0.1" id="temp-input" class="form-input" placeholder="°F">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Batch ID</label>
+                            <input type="text" id="batch-input" class="form-input" placeholder="Optional">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <textarea id="notes-input" class="form-input" rows="2" placeholder="Optional notes..."></textarea>
+                    </div>
+
+                    <button onclick="logTemperature()" class="btn btn-primary" style="font-size: 1.1rem;">
+                        ➕ LOG TEMPERATURE
+                    </button>
+                </div>
+            </div>
+
+            <!-- CCP Monitoring Tab -->
+            <div id="monitoring-tab" class="tab-content hidden">
+                <div class="card">
+                    <h3>Control Point Status</h3>
+                    <div id="ccp-status">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Readings Tab -->
+            <div id="recent-tab" class="tab-content hidden">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="margin: 0;">Recent Readings</h3>
+                        <button onclick="exportData()" class="btn btn-success" style="width: auto; padding: 0.5rem 1rem;">
+                            📄 Export
+                        </button>
+                    </div>
+                    
+                    <div id="readings-list">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings-tab" class="tab-content hidden">
+                <!-- SharePoint Configuration -->
+                <div class="card">
+                    <h3>🗃️ SharePoint Configuration</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">SharePoint Site URL</label>
+                        <input type="text" id="site-url" class="form-input" 
+                               placeholder="https://yourcompany.sharepoint.com/sites/HACCP">
+                        <div class="help-text">Your SharePoint site URL where HACCP data will be stored</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Tenant ID</label>
+                        <input type="text" id="tenant-id" class="form-input" 
+                               placeholder="12345678-1234-1234-1234-123456789012">
+                        <div class="help-text">From Azure Portal > Azure Active Directory</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">App Registration ID</label>
+                        <input type="text" id="client-id" class="form-input" 
+                               placeholder="87654321-4321-4321-4321-210987654321">
+                        <div class="help-text">From Azure Portal > App Registrations</div>
+                    </div>
+
+                    <button onclick="saveConfig()" class="btn btn-primary">
+                        💾 Save Configuration
+                    </button>
+                </div>
+
+                <!-- Authentication -->
+                <div class="card">
+                    <h3>🔐 Authentication</h3>
+                    
+                    <div id="not-authenticated">
+                        <p style="margin-bottom: 1rem; font-size: 0.875rem; color: #6b7280;">
+                            Sign in with your company Microsoft account to enable SharePoint sync.
+                        </p>
+                        <button onclick="authenticate()" class="btn btn-success">
+                            🔐 Sign In to SharePoint
+                        </button>
+                    </div>
+                    
+                    <div id="authenticated" class="hidden">
+                        <div style="background: #f0fdf4; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; border: 1px solid #16a34a;">
+                            <p style="color: #16a34a; font-weight: 600; margin-bottom: 0.25rem;">
+                                ✅ Authenticated as: <span id="user-name">John Doe</span>
+                            </p>
+                            <p style="color: #16a34a; font-size: 0.75rem;" id="user-email">john.doe@yourcompany.com</p>
+                        </div>
+                        <button onclick="logout()" class="btn btn-danger">
+                            🚪 Sign Out
+                        </button>
+                    </div>
+                </div>
+
+                <!-- App Settings -->
+                <div class="card">
+                    <h3>📱 App Settings</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span>Auto-sync when online</span>
+                        <input type="checkbox" checked>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span>Sound alerts</span>
+                        <input type="checkbox" checked>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Show sync indicators</span>
+                        <input type="checkbox" checked>
+                    </div>
+                </div>
+
+                <!-- Data Management -->
+                <div class="card">
+                    <h3>📊 Data Management</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <button onclick="exportData()" class="btn btn-success">📄 Export Temperature Data</button>
+                        <button onclick="performSync()" class="btn btn-primary">🔄 Force Full Sync</button>
+                        <div style="text-align: center; font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">
+                            <span id="data-info">2 readings stored • 1 synced</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        let isAuthenticated = false;
+        let currentUser = null;
+        let readings = [
+            {
+                id: 1,
+                timestamp: new Date().toISOString(),
+                ccpName: 'Cooking Station A',
+                ccpLocation: 'Line 1',
+                temperature: 168.5,
+                batchId: 'B20240103-001',
+                operatorId: 'John Doe',
+                notes: 'Normal operation',
+                inRange: true,
+                critical: false,
+                synced: true
+            },
+            {
+                id: 2,
+                timestamp: new Date(Date.now() - 300000).toISOString(),
+                ccpName: 'Cold Storage',
+                ccpLocation: 'Warehouse',
+                temperature: 45.2,
+                batchId: null,
+                operatorId: 'Maria Garcia',
+                notes: 'Temperature spike detected',
+                inRange: false,
+                critical: true,
+                synced: false
+            }
+        ];
+
+        const ccps = {
+            1: { name: 'Cooking Station A', location: 'Line 1', minTemp: 165, maxTemp: 185, critical: true },
+            2: { name: 'Cold Storage', location: 'Warehouse', minTemp: 32, maxTemp: 40, critical: true },
+            3: { name: 'Hot Holding', location: 'Line 2', minTemp: 140, maxTemp: 160, critical: true },
+            4: { name: 'Blast Chiller', location: 'Processing', minTemp: 0, maxTemp: 32, critical: false },
+            5: { name: 'Fryer Oil', location: 'Line 1', minTemp: 325, maxTemp: 375, critical: true }
+        };
+
+        let bluetoothConnected = false;
+        let liveTemp = null;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUI();
+        });
+
+        function showTab(tabName) {
+            // Update nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Show/hide content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+
+            // Update content
+            if (tabName === 'monitoring') updateCCPStatus();
+            if (tabName === 'recent') updateReadingsList();
+        }
+
+        function saveConfig() {
+            const siteUrl = document.getElementById('site-url').value;
+            const tenantId = document.getElementById('tenant-id').value;
+            const clientId = document.getElementById('client-id').value;
+
+            if (!siteUrl || !tenantId || !clientId) {
+                alert('Please fill in all configuration fields!');
+                return;
+            }
+
+            alert('✅ Configuration saved!\n\nYou can now authenticate with SharePoint.');
+        }
+
+        function authenticate() {
+            const siteUrl = document.getElementById('site-url').value;
+            const tenantId = document.getElementById('tenant-id').value;
+            const clientId = document.getElementById('client-id').value;
+
+            if (!siteUrl || !tenantId || !clientId) {
+                alert('❌ Please configure SharePoint settings first!');
+                showTab('settings');
+                return;
+            }
+
+            // Simulate authentication
+            isAuthenticated = true;
+            currentUser = {
+                name: 'John Doe',
+                email: 'john.doe@yourcompany.com'
+            };
+
+            updateAuthenticationUI();
+            alert('✅ Successfully authenticated with SharePoint!\n\nIn production, this would use Microsoft Azure AD authentication.');
+        }
+
+        function logout() {
+            isAuthenticated = false;
+            currentUser = null;
+            updateAuthenticationUI();
+            alert('👋 Successfully signed out.');
+        }
+
+        function updateAuthenticationUI() {
+            if (isAuthenticated) {
+                document.getElementById('config-alert').classList.add('hidden');
+                document.getElementById('sync-card').classList.remove('hidden');
+                document.getElementById('not-authenticated').classList.add('hidden');
+                document.getElementById('authenticated').classList.remove('hidden');
+                document.getElementById('current-user').textContent = currentUser.name;
+                document.getElementById('user-name').textContent = currentUser.name;
+                document.getElementById('user-email').textContent = currentUser.email;
+                document.getElementById('sync-status').textContent = 'Connected';
+                document.getElementById('sync-status').className = 'status-badge status-connected';
+                document.getElementById('db-icon').textContent = '🟢';
+            } else {
+                document.getElementById('config-alert').classList.remove('hidden');
+                document.getElementById('sync-card').classList.add('hidden');
+                document.getElementById('not-authenticated').classList.remove('hidden');
+                document.getElementById('authenticated').classList.add('hidden');
+                document.getElementById('current-user').textContent = 'Not authenticated';
+                document.getElementById('sync-status').textContent = 'Not configured';
+                document.getElementById('sync-status').className = 'status-badge status-not-auth';
+                document.getElementById('db-icon').textContent = '🔴';
+            }
+        }
+
+        function selectCCP(ccpId) {
+            document.getElementById('ccp-select').value = ccpId;
+        }
+
+        function connectBluetooth() {
+            document.getElementById('bt-status').textContent = 'Connecting...';
+            document.getElementById('bt-status').className = 'status-badge status-warning';
+            
+            setTimeout(() => {
+                bluetoothConnected = true;
+                document.getElementById('bt-status').textContent = 'Connected';
+                document.getElementById('bt-status').className = 'status-badge status-connected';
+                document.getElementById('bt-disconnected').classList.add('hidden');
+                document.getElementById('bt-connected').classList.remove('hidden');
+                
+                // Start temperature simulation
+                setInterval(() => {
+                    const ccpId = document.getElementById('ccp-select').value;
+                    let baseTemp = 100;
+                    if (ccpId && ccps[ccpId]) {
+                        baseTemp = (ccps[ccpId].minTemp + ccps[ccpId].maxTemp) / 2;
+                    }
+                    const variation = (Math.random() - 0.5) * 20;
+                    liveTemp = (baseTemp + variation).toFixed(1);
+                    document.getElementById('live-temp').textContent = liveTemp + '°F';
+                }, 2000);
+            }, 2000);
+        }
+
+        function useReading() {
+            if (liveTemp) {
+                document.getElementById('temp-input').value = liveTemp;
+            }
+        }
+
+        function logTemperature() {
+            const ccpId = document.getElementById('ccp-select').value;
+            const temperature = parseFloat(document.getElementById('temp-input').value);
+            const batchId = document.getElementById('batch-input').value;
+            const notes = document.getElementById('notes-input').value;
+
+            if (!ccpId || !temperature) {
+                alert('❌ Please select a CCP and enter temperature');
+                return;
+            }
+
+            const ccp = ccps[ccpId];
+            const isInRange = temperature >= ccp.minTemp && temperature <= ccp.maxTemp;
+            const isCritical = ccp.critical && !isInRange;
+
+            const newReading = {
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                ccpName: ccp.name,
+                ccpLocation: ccp.location,
+                temperature: temperature,
+                batchId: batchId || null,
+                operatorId: 'John Doe',
+                notes: notes || null,
+                inRange: isInRange,
+                critical: isCritical,
+                synced: isAuthenticated
+            };
+
+            readings.unshift(newReading);
+
+            // Clear form
+            document.getElementById('temp-input').value = '';
+            document.getElementById('batch-input').value = '';
+            document.getElementById('notes-input').value = '';
+
+            updateUI();
+
+            if (isCritical) {
+                alert(`🚨 CRITICAL ALERT 🚨\n\nTemperature ${temperature}°F is OUT OF RANGE for ${ccp.name}\n\nAcceptable range: ${ccp.minTemp}-${ccp.maxTemp}°F\n\nImmediate corrective action required!\n${isAuthenticated ? 'Alert sent to PowerApps dashboard.' : 'Will sync to PowerApps when authenticated.'}`);
+            } else {
+                alert('✅ Temperature logged successfully!' + (isAuthenticated ? '\n📤 Synced to SharePoint!' : '\n⏳ Will sync when authenticated.'));
+            }
+
+            // Switch to recent tab
+            showTab('recent');
+        }
+
+        function performSync() {
+            if (!isAuthenticated) {
+                alert('❌ Please authenticate with SharePoint first!');
+                return;
+            }
+
+            alert('🔄 Syncing data to SharePoint...');
+            
+            setTimeout(() => {
+                // Mark all readings as synced
+                readings.forEach(reading => {
+                    reading.synced = true;
+                });
+                
+                document.getElementById('last-sync').textContent = new Date().toLocaleString();
+                updateUI();
+                alert('✅ Successfully synced all data to SharePoint!\n\n📊 Data is now available in PowerApps dashboards.');
+            }, 2000);
+        }
+
+        function updateCCPStatus() {
+            const container = document.getElementById('ccp-status');
+            container.innerHTML = '';
+
+            Object.entries(ccps).forEach(([id, ccp]) => {
+                const recentReading = readings.find(r => r.ccpName === ccp.name);
+                
+                const item = document.createElement('div');
+                item.style.cssText = `
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 1rem;
+                    margin-bottom: 0.75rem;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 0.5rem;
+                    background: white;
+                `;
+                
+                item.innerHTML = `
+                    <div>
+                        <h4 style="font-weight: 600; margin-bottom: 0.25rem;">${ccp.name}</h4>
+                        <div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.25rem;">${ccp.location}</div>
+                        <div style="font-size: 0.625rem; color: #9ca3af;">Range: ${ccp.minTemp}-${ccp.maxTemp}°F</div>
+                    </div>
+                    <div style="text-align: right;">
+                        ${recentReading ? `
+                            <div style="font-size: 1.25rem; font-weight: 700; color: ${recentReading.inRange ? '#16a34a' : '#dc2626'}">${recentReading.temperature}°F</div>
+                            <div style="font-size: 0.625rem; color: #6b7280;">${new Date(recentReading.timestamp).toLocaleTimeString()}</div>
+                            <div style="font-size: 0.6rem; color: ${recentReading.synced ? '#16a34a' : '#f59e0b'};">
+                                ${recentReading.synced ? '✓ Synced' : '⏳ Pending'}
+                            </div>
+                        ` : `
+                            <div style="color: #9ca3af; font-size: 0.875rem;">No readings</div>
+                        `}
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+
+        function updateReadingsList() {
+            const container = document.getElementById('readings-list');
+            
+            if (readings.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 2rem;">No readings logged yet</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            
+            readings.slice(0, 10).forEach(reading => {
+                const item = document.createElement('div');
+                let className = 'reading-item ';
+                if (reading.critical) {
+                    className += 'reading-critical';
+                } else if (reading.inRange) {
+                    className += 'reading-in-range';
+                } else {
+                    className += 'reading-out-range';
+                }
+                
+                item.className = className;
+                
+                const syncIndicatorClass = reading.synced ? 'sync-synced' : 'sync-pending';
+                
+                item.innerHTML = `
+                    <div class="sync-indicator ${syncIndicatorClass}"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <div>
+                            <strong style="font-size: 0.9rem;">${reading.ccpName}</strong>
+                            <div style="font-size: 0.75rem; color: #6b7280;">${reading.ccpLocation}</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.2rem;">${reading.inRange ? '✅' : '❌'}</span>
+                            <span style="font-weight: bold; color: ${reading.inRange ? '#16a34a' : '#dc2626'};">${reading.temperature}°F</span>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #6b7280;">
+                        <div>📅 ${new Date(reading.timestamp).toLocaleString()}</div>
+                        ${reading.batchId ? `<div>📦 Batch: ${reading.batchId}</div>` : ''}
+                        <div>👤 By: ${reading.operatorId}</div>
+                        ${reading.notes ? `<div>📝 ${reading.notes}</div>` : ''}
+                        <div style="margin-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="background: ${reading.synced ? '#dcfce7' : '#fef3c7'}; color: ${reading.synced ? '#16a34a' : '#d97706'}; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.625rem;">
+                                ${reading.synced ? '✅ Synced to SharePoint' : '⏳ Pending sync'}
+                            </span>
+                            ${reading.critical ? '<span style="background: #fef2f2; color: #dc2626; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.625rem; font-weight: 600;">🚨 CRITICAL</span>' : ''}
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+
+        function updateUI() {
+            // Update sync stats
+            const total = readings.length;
+            const synced = readings.filter(r => r.synced).length;
+            const pending = total - synced;
+
+            document.getElementById('total-count').textContent = total;
+            document.getElementById('synced-count').textContent = synced;
+            document.getElementById('pending-count').textContent = pending;
+            document.getElementById('data-info').textContent = `${total} readings stored • ${synced} synced`;
+
+            // Update current tab content
+            const activeTab = document.querySelector('.nav-tab.active');
+            if (activeTab) {
+                const tabName = activeTab.onclick.toString().match(/showTab\('(.+?)'\)/)[1];
+                if (tabName === 'monitoring') updateCCPStatus();
+                if (tabName === 'recent') updateReadingsList();
+            }
+        }
+
+        function exportData() {
+            const csvContent = [
+                ['Timestamp', 'CCP', 'Location', 'Temperature', 'Batch ID', 'Operator', 'In Range', 'Critical', 'Synced', 'Notes'],
+                ...readings.map(reading => [
+                    new Date(reading.timestamp).toLocaleString(),
+                    reading.ccpName,
+                    reading.ccpLocation,
+                    reading.temperature,
+                    reading.batchId || '',
+                    reading.operatorId,
+                    reading.inRange ? 'Yes' : 'No',
+                    reading.critical ? 'Yes' : 'No',
+                    reading.synced ? 'Yes' : 'No',
+                    reading.notes || ''
+                ])
+            ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `haccp-log-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            alert('📄 Data exported successfully!\n\nCSV file downloaded with all temperature readings.');
+        }
+
+        // Initialize authentication UI
+        updateAuthenticationUI();
+    </script>
+</body>
+</html>
